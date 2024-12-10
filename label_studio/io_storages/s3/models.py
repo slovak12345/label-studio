@@ -207,13 +207,14 @@ class S3ExportStorage(S3StorageMixin, ExportStorage):
         task = annotation.task
         image_s3_path = list(task.data.values())[0]
         image_file = image_s3_path.split('/')[-1]
+        image_path = image_s3_path.split('/')[-2]
         image_filename = image_file.split('.')[0]
         ser_annotation = self._get_serialized_data(annotation)
 
         # get key that identifies this object in storage
         key = S3ExportStorageLink.get_key(annotation)
         key = str(self.prefix) + '/' + key if self.prefix else key
-        key = image_filename + "." + "txt"
+        key = image_path + "/" + "labels" + "/" + image_filename + "." + "txt"
 
         # put object into storage
         additional_params = {}
