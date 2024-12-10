@@ -29,6 +29,10 @@ from tasks.models import Annotation, Task
 from tasks.serializers import AnnotationSerializer, PredictionSerializer
 from webhooks.models import WebhookAction
 from webhooks.utils import emit_webhooks_for_instance
+from tasks.functions import export_project
+from data_export.models import DataExport
+
+import shutil
 
 logger = logging.getLogger(__name__)
 
@@ -546,6 +550,12 @@ class ExportStorage(Storage, ProjectStorageMixin):
         raise NotImplementedError
 
     def save_all_annotations(self):
+        project_id = self.project.id
+        export_format = 'YOLO'
+        export_dir = settings.EXPORT_DIR
+        filepath = export_project(project_id, export_format, export_dir)
+        title = self.project.title
+        shutil.unpack_archive(filepath, f"/tmp/label-studio-{title}")
         annotation_exported = 0
         total_annotations = Annotation.objects.filter(project=self.project).count()
         self.info_set_in_progress()
