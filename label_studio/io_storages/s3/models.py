@@ -214,7 +214,7 @@ class S3ExportStorage(S3StorageMixin, ExportStorage):
         # get key that identifies this object in storage
         key = S3ExportStorageLink.get_key(annotation)
         key = str(self.prefix) + '/' + key if self.prefix else key
-        key = f"label-studio-{image_path}/labels/{image_filename}.txt"
+        key = f"{image_path}/labels/{image_filename}.txt"
 
         # put object into storage
         additional_params = {}
@@ -229,8 +229,10 @@ class S3ExportStorage(S3StorageMixin, ExportStorage):
             else:
                 additional_params['ServerSideEncryption'] = 'AES256'
 
-        s3.Object(self.bucket, key).put(Body=open(f'/tmp/{image_path}/labels/{image_filename}.txt', 'rb'), **additional_params)
 
+        #s3.Object(self.bucket, key).put(Body=open(f'/tmp/{image_path}/labels/{image_filename}.txt', 'rb'), **additional_params)
+
+        gramer = 10
         # create link if everything ok
         S3ExportStorageLink.create(annotation, self)
 
