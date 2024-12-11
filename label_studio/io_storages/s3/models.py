@@ -232,6 +232,7 @@ class S3ExportStorage(S3StorageMixin, ExportStorage):
 
         s3.Object(self.bucket, key).put(Body=open(f'/tmp/{image_path}/labels/{image_filename}.txt', 'rb'), **additional_params)
 
+
         gramer = 10
         # create link if everything ok
         S3ExportStorageLink.create(annotation, self)
