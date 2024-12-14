@@ -201,7 +201,7 @@ class S3ImportStorage(ProjectStorageMixin, S3ImportStorageBase):
 
 
 class S3ExportStorage(S3StorageMixin, ExportStorage):   
-    def save_annotation(self, annotation):
+    def save_annotation(self, annotation, type_annotation=""):
         client, s3 = self.get_client_and_resource()
         logger.debug(f'Creating new object on {self.__class__.__name__} Storage {self} for annotation {annotation}')
         task = annotation.task
@@ -229,9 +229,15 @@ class S3ExportStorage(S3StorageMixin, ExportStorage):
             else:
                 additional_params['ServerSideEncryption'] = 'AES256'
 
-            #ad
-        
-        s3.Object(self.bucket, key).put(Body=open(f'/tmp/{image_path}/labels/{image_filename}.txt', 'rb'), **additional_params)
+
+        if type_annotation == "classes": 
+            key = f"{image_path}/classes.txt"
+            s3.Object(self.bucket, key).put(Body=open(f'/tmp/{image_path}/classes.txt', 'rb'), **additional_params)
+        elif type_annotation == "notes":
+            key = f"{image_path}/notes.json"
+            s3.Object(self.bucket, key).put(Body=open(f'/tmp/{image_path}/notes.json', 'rb'), **additional_params)
+        else:
+            s3.Object(self.bucket, key).put(Body=open(f'/tmp/{image_path}/labels/{image_filename}.txt', 'rb'), **additional_params)
 
         # create link if everything ok
         S3ExportStorageLink.create(annotation, self)

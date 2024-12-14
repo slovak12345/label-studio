@@ -547,7 +547,7 @@ class ExportStorage(Storage, ProjectStorageMixin):
             # deprecated functionality - save only annotation
             return serializer_class(annotation, context={'project': self.project}).data
 
-    def save_annotation(self, annotation):
+    def save_annotation(self, annotation, type_annotation):
         raise NotImplementedError
 
     def save_all_annotations(self):
@@ -571,6 +571,8 @@ class ExportStorage(Storage, ProjectStorageMixin):
             # update progress counters
             annotation_exported += 1
             self.info_update_progress(last_sync_count=annotation_exported, total_annotations=total_annotations)
+        self.save_annotation(annotation, type_annotation="classes")
+        self.save_annotation(annotation, type_annotation="notes")
         shutil.rmtree(f"/tmp/label-studio-{title}")
         remove(f"{tmp_dir}.zip")
         self.info_set_completed(last_sync_count=annotation_exported, total_annotations=total_annotations)
