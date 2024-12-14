@@ -200,7 +200,7 @@ class S3ImportStorage(ProjectStorageMixin, S3ImportStorageBase):
         abstract = False
 
 
-class S3ExportStorage(S3StorageMixin, ExportStorage):
+class S3ExportStorage(S3StorageMixin, ExportStorage):   
     def save_annotation(self, annotation):
         client, s3 = self.get_client_and_resource()
         logger.debug(f'Creating new object on {self.__class__.__name__} Storage {self} for annotation {annotation}')
@@ -233,8 +233,6 @@ class S3ExportStorage(S3StorageMixin, ExportStorage):
         
         s3.Object(self.bucket, key).put(Body=open(f'/tmp/{image_path}/labels/{image_filename}.txt', 'rb'), **additional_params)
 
-
-        gramer = 10
         # create link if everything ok
         S3ExportStorageLink.create(annotation, self)
 

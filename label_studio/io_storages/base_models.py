@@ -570,7 +570,7 @@ class ExportStorage(Storage, ProjectStorageMixin):
             # update progress counters
             annotation_exported += 1
             self.info_update_progress(last_sync_count=annotation_exported, total_annotations=total_annotations)
-
+        shutil.rmtree(f"/tmp/label-studio-{title}")
         self.info_set_completed(last_sync_count=annotation_exported, total_annotations=total_annotations)
 
     def sync(self):
