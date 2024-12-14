@@ -120,7 +120,7 @@ def export_project(project_id, export_format, path, serializer_context=None):
         tasks += ExportDataSerializer(_task_ids, many=True, **serializer_options).data
 
     # convert to output format
-    export_file, _, filename = DataExport.generate_export_file(
+    export_file, _, filename, tmp_dir = DataExport.generate_export_file(
         project, tasks, export_format, settings.CONVERTER_DOWNLOAD_RESOURCES, {}
     )
 
@@ -132,7 +132,7 @@ def export_project(project_id, export_format, path, serializer_context=None):
 
     logger.debug(f'End exporting project <{project.title}> ({project.id}) in {export_format} format.')
 
-    return filepath
+    return filepath, tmp_dir
 
 
 def _fill_annotations_project(project_id):

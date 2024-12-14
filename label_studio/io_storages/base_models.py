@@ -31,6 +31,7 @@ from webhooks.models import WebhookAction
 from webhooks.utils import emit_webhooks_for_instance
 from tasks.functions import export_project
 from data_export.models import DataExport
+from os import remove
 
 import shutil
 
@@ -553,7 +554,7 @@ class ExportStorage(Storage, ProjectStorageMixin):
         project_id = self.project.id
         export_format = 'YOLO'
         export_dir = settings.EXPORT_DIR
-        filepath = export_project(project_id, export_format, export_dir)
+        filepath, tmp_dir = export_project(project_id, export_format, export_dir)
         title = self.project.title
         shutil.unpack_archive(filepath, f"/tmp/label-studio-{title}")
         annotation_exported = 0
@@ -571,6 +572,7 @@ class ExportStorage(Storage, ProjectStorageMixin):
             annotation_exported += 1
             self.info_update_progress(last_sync_count=annotation_exported, total_annotations=total_annotations)
         shutil.rmtree(f"/tmp/label-studio-{title}")
+        remove(f"{tmp_dir}.zip")
         self.info_set_completed(last_sync_count=annotation_exported, total_annotations=total_annotations)
 
     def sync(self):

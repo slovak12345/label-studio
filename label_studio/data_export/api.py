@@ -203,7 +203,7 @@ class ExportAPI(generics.RetrieveAPIView):
             ).data
         logger.debug('Prepare export files')
 
-        export_file, content_type, filename = DataExport.generate_export_file(
+        export_file, content_type, filename, tmp_dir = DataExport.generate_export_file(
             project, tasks, export_type, download_resources, request.GET
         )
 

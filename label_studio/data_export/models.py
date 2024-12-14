@@ -179,7 +179,7 @@ class DataExport(object):
             out = path_to_open_binary_file(os.path.abspath(tmp_dir + '.zip'))
             content_type = 'application/zip'
             filename = name + '.zip'
-            return out, content_type, filename
+            return out, content_type, filename, tmp_dir
 
 
 class ConvertedFormat(models.Model):
