@@ -318,7 +318,7 @@ def main():
         from tasks.functions import export_project
 
         try:
-            filename = export_project(
+            filename, tmp_dir = export_project(
                 input_args.project_id,
                 input_args.export_format,
                 input_args.export_path,

@@ -200,15 +200,21 @@ class S3ImportStorage(ProjectStorageMixin, S3ImportStorageBase):
         abstract = False
 
 
-class S3ExportStorage(S3StorageMixin, ExportStorage):
-    def save_annotation(self, annotation):
+class S3ExportStorage(S3StorageMixin, ExportStorage):   
+    def save_annotation(self, annotation, type_annotation=""):
         client, s3 = self.get_client_and_resource()
         logger.debug(f'Creating new object on {self.__class__.__name__} Storage {self} for annotation {annotation}')
+        task = annotation.task
+        image_s3_path = list(task.data.values())[0]
+        image_file = image_s3_path.split('/')[-1]
+        image_path = image_s3_path.split('/')[-2]
+        image_filename = image_file.split('.')[0]
         ser_annotation = self._get_serialized_data(annotation)
 
         # get key that identifies this object in storage
         key = S3ExportStorageLink.get_key(annotation)
         key = str(self.prefix) + '/' + key if self.prefix else key
+        key = f"{image_path}/labels/{image_filename}.txt"
 
         # put object into storage
         additional_params = {}
@@ -223,7 +229,15 @@ class S3ExportStorage(S3StorageMixin, ExportStorage):
             else:
                 additional_params['ServerSideEncryption'] = 'AES256'
 
-        s3.Object(self.bucket, key).put(Body=json.dumps(ser_annotation), **additional_params)
+
+        if type_annotation == "classes": 
+            key = f"{image_path}/classes.txt"
+            s3.Object(self.bucket, key).put(Body=open(f'/tmp/{image_path}/classes.txt', 'rb'), **additional_params)
+        elif type_annotation == "notes":
+            key = f"{image_path}/notes.json"
+            s3.Object(self.bucket, key).put(Body=open(f'/tmp/{image_path}/notes.json', 'rb'), **additional_params)
+        else:
+            s3.Object(self.bucket, key).put(Body=open(f'/tmp/{image_path}/labels/{image_filename}.txt', 'rb'), **additional_params)
 
         # create link if everything ok
         S3ExportStorageLink.create(annotation, self)

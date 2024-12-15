@@ -29,6 +29,11 @@ from tasks.models import Annotation, Task
 from tasks.serializers import AnnotationSerializer, PredictionSerializer
 from webhooks.models import WebhookAction
 from webhooks.utils import emit_webhooks_for_instance
+from tasks.functions import export_project
+from data_export.models import DataExport
+from os import remove
+
+import shutil
 
 logger = logging.getLogger(__name__)
 
@@ -542,10 +547,16 @@ class ExportStorage(Storage, ProjectStorageMixin):
             # deprecated functionality - save only annotation
             return serializer_class(annotation, context={'project': self.project}).data
 
-    def save_annotation(self, annotation):
+    def save_annotation(self, annotation, type_annotation):
         raise NotImplementedError
 
     def save_all_annotations(self):
+        project_id = self.project.id
+        export_format = 'YOLO'
+        export_dir = settings.EXPORT_DIR
+        filepath, tmp_dir = export_project(project_id, export_format, export_dir)
+        title = self.project.title
+        shutil.unpack_archive(filepath, f"/tmp/label-studio-{title}")
         annotation_exported = 0
         total_annotations = Annotation.objects.filter(project=self.project).count()
         self.info_set_in_progress()
@@ -560,7 +571,10 @@ class ExportStorage(Storage, ProjectStorageMixin):
             # update progress counters
             annotation_exported += 1
             self.info_update_progress(last_sync_count=annotation_exported, total_annotations=total_annotations)
-
+        self.save_annotation(annotation, type_annotation="classes")
+        self.save_annotation(annotation, type_annotation="notes")
+        shutil.rmtree(f"/tmp/label-studio-{title}")
+        remove(f"{tmp_dir}.zip")
         self.info_set_completed(last_sync_count=annotation_exported, total_annotations=total_annotations)
 
     def sync(self):
