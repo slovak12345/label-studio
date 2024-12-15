@@ -258,6 +258,7 @@ class S3ExportStorage(S3StorageMixin, ExportStorage):
 
 
 def async_export_annotation_to_s3_storages(annotation):
+    project = annotation.project
     if hasattr(project, 'io_storages_s3exportstorages'):
         for storage in project.io_storages_s3exportstorages.all():
             logger.debug(f'Export {annotation} to S3 storage {storage}')
